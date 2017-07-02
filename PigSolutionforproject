@@ -1,0 +1,16 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
+{\*\generator Riched20 6.3.9600}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang9\par
+#The tweets are in nested Json format and consists of map data types. We need to load the tweets using JsonLoader which supports maps, so we are using elephant bird JsonLoader to load the tweets.#\par
+\par
+\ul Below is the first Pig statement required to load the tweets into Pig:\par
+\ulnone 1) load_tweets = LOAD '/user/flume/tweets/' USING        com.twitter.elephantbird.pig.load.JsonLoader('-nestedLoad') AS myMap;\par
+\ul Now, we shall extract the BPL_Records and the tweet Values from the above tweets. The Pig statement necessary to perform this is as shown below:\ulnone\par
+2) extract_details = FOREACH load_tweets GENERATE myMap#'BPL' as BPL_Value,myMap#'District' as text;\par
+\ul We have the tweet BPL_Records and the tweets Values in the relation named as extract_details.Now, we shall extract the words from the text using the TOKENIZE key word in Pig.\par
+\ulnone 3) tokens = foreach extract_details generate BPL,text, FLATTEN(TOKENIZE(text)) As word;\par
+4) Find_per_district = foreach tokens generate BPL >=100;\par
+5) BPL_count = foreach Find_per_district  Generate COUNT(Find_per_district.BPL);\par
+6) dump BPL_count;\par
+\par
+}
